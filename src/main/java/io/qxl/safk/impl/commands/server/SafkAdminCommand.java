@@ -829,6 +829,24 @@ public class SafkAdminCommand implements IServerCommand
     }
 
     @ApiStatus.Internal
+    /**
+     * Strips one layer of matching quotes so a string option can be blanked, or
+     * keep leading and trailing spaces. Brigadier hands a greedy argument over
+     * with the quotes still attached, and without this there is no way to set a
+     * string back to empty.
+     */
+    private static String unquote(String value)
+    {
+        if (value.length() > 1
+            && ((value.startsWith("\"") && value.endsWith("\""))
+                || (value.startsWith("'") && value.endsWith("'"))))
+        {
+            return value.substring(1, value.length() - 1);
+        }
+
+        return value;
+    }
+
     private int setConfig(CommandContext<CommandSourceStack> ctx, String config, String value)
     {
         Pair<Field, Object> target = SafkConfigHandler.getInstance().getConfigInstanceByField(config);
@@ -912,7 +930,7 @@ public class SafkAdminCommand implements IServerCommand
             }
             else if (fieldType == String.class)
             {
-                parsedValue = value.replace('&', '§');
+                parsedValue = unquote(value).replace('&', '§');
             }
             else if (fieldType.isEnum())
             {
