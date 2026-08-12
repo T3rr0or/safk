@@ -30,12 +30,15 @@ Requires permission level 4 by default.
 * **`/safk-admin`**: Displays information about the mod.
 * **`/safk-admin save`**: Saves the current configuration.
 * **`/safk-admin reload`**: Reloads the configuration, discarding unsaved changes.
-* **`/safk-admin purge`**: Purges players and resyncs the tracked player/bot maps with the live server.
+* **`/safk-admin purge`**: Resyncs the tracked player/bot maps against the live server. It does not prune stored records — use `forget` for that.
+* **`/safk-admin forget <player>`**: Drops a stored player record. Refused while that player is connected or AFK.
 * **`/safk-admin spawn <player> [<minutes>] [<reason>]`**: Manually spawns an AFK bot for a player.
 * **`/safk-admin kick <player>`**: Removes an active AFK bot.
 * **`/safk-admin info [<player>]`**: Detailed debug information for a player. (`advancedAdminOptions` unlocks the full player info)
 * **`/safk-admin list [players|bots|all]`**: Lists tracked players or active bots. (`advancedAdminOptions` unlocks the sub commands)
-* **`/safk-admin set <setting> <value>`**: Sets a config value. (`advancedAdminOptions` unlocks this sub command)
+* **`/safk-admin set <setting> <value>`**: Sets a config value. (`advancedAdminOptions` unlocks this sub command, except for `advancedAdminOptions` itself, so you can always switch it back on)
+
+`advancedAdminOptions` takes effect immediately — no restart needed.
 
 ## Configuration
 

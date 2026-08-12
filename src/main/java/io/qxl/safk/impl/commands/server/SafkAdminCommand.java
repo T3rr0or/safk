@@ -72,6 +72,7 @@ import static net.minecraft.commands.Commands.literal;
 public class SafkAdminCommand implements IServerCommand
 {
     public static final String COMMAND = "safk-admin";
+    private static final String ADVANCED_OPTIONS_FIELD = "advancedAdminOptions";
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment)
@@ -156,6 +157,22 @@ public class SafkAdminCommand implements IServerCommand
                                                     )
                                       )
                         )
+                        .then(literal("forget")
+                                      .requires(PermsWrap.check(this.getNode()+".forget", ConfigWrap.cmdOpt().safkAdminCommandPermissions))
+                                      .then(argument("player", StringArgumentType.string())
+                                                    .suggests(
+                                                            (ctx, builder) ->
+                                                                    SharedSuggestionProvider.suggest(
+                                                                            ConfigWrap.players().stream().map(opt -> opt.name).toList(),
+                                                                            builder
+                                                                    )
+                                                    )
+                                                    .requires(PermsWrap.check(this.getNode()+".forget", ConfigWrap.cmdOpt().safkAdminCommandPermissions))
+                                                    .executes(ctx ->
+                                                              this.forgetPlayer(ctx, StringArgumentType.getString(ctx, "player"))
+                                                    )
+                                      )
+                        )
                         .then(literal("kick")
                                       .requires(PermsWrap.check(this.getNode()+".kick", ConfigWrap.cmdOpt().safkAdminCommandPermissions))
                                       .then(argument("target", StringArgumentType.string())
@@ -177,8 +194,11 @@ public class SafkAdminCommand implements IServerCommand
                                                     )
                                       )
                         )
+                        // Gated on permission alone; setConfig() applies the
+                        // advancedAdminOptions rule, so the flag that turns
+                        // advanced options off can still turn them back on.
                         .then(literal("set")
-                                      .requires(PermsWrap.checkAdv(this.getNode()+".set", ConfigWrap.cmdOpt().safkAdminCommandPermissions))
+                                      .requires(PermsWrap.check(this.getNode()+".set", ConfigWrap.cmdOpt().safkAdminCommandPermissions))
                                       .then(argument("config", StringArgumentType.string())
                                                     .suggests(
                                                             (ctx, builder) ->
@@ -189,7 +209,7 @@ public class SafkAdminCommand implements IServerCommand
                                                                             Component::literal
                                                                     )
                                                     )
-                                                    .requires(PermsWrap.checkAdv(this.getNode()+".set", ConfigWrap.cmdOpt().safkAdminCommandPermissions))
+                                                    .requires(PermsWrap.check(this.getNode()+".set", ConfigWrap.cmdOpt().safkAdminCommandPermissions))
                                                     .then(argument("value", StringArgumentType.greedyString())
                                                                   .suggests((ctx, builder) ->
                                                                             {
@@ -507,6 +527,51 @@ public class SafkAdminCommand implements IServerCommand
         return 1;
     }
 
+    /**
+     * Drops a stored player record. Purge only resyncs against the live server,
+     * so it leaves behind entries for players the server will never see again.
+     */
+    @ApiStatus.Internal
+    private int forgetPlayer(CommandContext<CommandSourceStack> ctx, String name)
+    {
+        PlayerOptions target = ConfigWrap.players().stream()
+                                         .filter(opt -> opt.name.equalsIgnoreCase(name))
+                                         .findFirst()
+                                         .orElse(null);
+        String reply;
+
+        if (target == null)
+        {
+            reply = "§cNo stored record for §e"+ name + "§r";
+        }
+        else if (SafkEntryList.getInstance().contains(target.uuid))
+        {
+            reply = "§e"+ target.name + "§c is AFK right now; kick them first§r";
+        }
+        else if (ctx.getSource().getServer().getPlayerList().getPlayer(target.uuid) != null)
+        {
+            // Forgetting someone who is online only makes the record come straight back.
+            reply = "§e"+ target.name + "§c is still connected and has to leave first§r";
+        }
+        else
+        {
+            PlayerManager.getInstance().remove(target.uuid, true, SafkStatus.INACTIVE);
+            ConfigManager.getInstance().saveEach(SafkConfigHandler.getInstance());
+            reply = "§aForgot §e"+ target.name + "§r";
+            SaveAfk.LOGGER.info("{} removed the stored record for {}", ctx.getSource().getTextName(), target.name);
+        }
+
+        final String finalReply = reply;
+
+        //#if MC >= 1.20.1
+        //$$ ctx.getSource().sendSuccess(() -> InitWrap.text().formatText(finalReply), false);
+        //#else
+        ctx.getSource().sendSuccess(InitWrap.text().formatText(finalReply), false);
+        //#endif
+
+        return 1;
+    }
+
     private int purgePlayers(CommandContext<CommandSourceStack> ctx)
     {
         ServerPlayer player = ctx.getSource().getPlayer();
@@ -594,15 +659,22 @@ public class SafkAdminCommand implements IServerCommand
                     PlayerOptions opts = ConfigWrap.players().stream()
                             .filter(opt -> opt.uuid.equals(ProfileWrap.id(entry)))
                                                    .findFirst()
-                                                   .orElseThrow();
+                                                   .orElse(null);
 
-                    SaveAfk.debugLog("createSafk: Scheduling AFK player: ['{}'/{}]", opts.name, opts.uuid.toString());
-                    reply = "§eScheduling AFK spawn for: §7"+ result + "§r";
-                    opts.state = new SafkState(SafkStatus.ACTIVE, time, (time * 60L) * 1000L, System.currentTimeMillis(), reason);
-                    PlayerManager.getInstance().setState(entry, opts.state);
-                    PlayerManager.getInstance().flushToConfig(ctx.getSource().getServer());
-                    ServerEventsHandler.getInstance().toggleSpawnSafe(false);
-                    SafkPendingSpawns.INSTANCE.scheduleSpawn(opts);
+                    if (opts == null)
+                    {
+                        reply = "§cNo stored record for §e"+ result + "§c to spawn from§r";
+                    }
+                    else
+                    {
+                        SaveAfk.debugLog("createSafk: Scheduling AFK player: ['{}'/{}]", opts.name, opts.uuid.toString());
+                        reply = "§eScheduling AFK spawn for: §7"+ result + "§r";
+                        opts.state = new SafkState(SafkStatus.ACTIVE, time, (time * 60L) * 1000L, System.currentTimeMillis(), reason);
+                        PlayerManager.getInstance().setState(entry, opts.state);
+                        PlayerManager.getInstance().flushToConfig(ctx.getSource().getServer());
+                        ServerEventsHandler.getInstance().toggleSpawnSafe(false);
+                        SafkPendingSpawns.INSTANCE.scheduleSpawn(opts);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -616,7 +688,11 @@ public class SafkAdminCommand implements IServerCommand
 
         if (!found)
         {
-            reply = "§cNo matching player found§r";
+            // Only offline players are offered, so an online name is a likely mistake
+            // rather than an unknown player.
+            reply = ctx.getSource().getServer().getPlayerList().getPlayerByName(result) != null
+                    ? "§e"+ result + "§c is still connected and has to leave first§r"
+                    : "§cNo matching player found§r";
         }
 
         final String finalReply = reply;
@@ -730,6 +806,20 @@ public class SafkAdminCommand implements IServerCommand
     {
         Pair<Field, Object> target = SafkConfigHandler.getInstance().getConfigInstanceByField(config);
         String reply;
+
+        if (!ConfigWrap.mainOpt().advancedAdminOptions && !config.equals(ADVANCED_OPTIONS_FIELD))
+        {
+            reply = "§cSet is off; enable §e"+ ADVANCED_OPTIONS_FIELD + "§c first§r";
+            String finalReply = reply;
+
+            //#if MC >= 1.20.1
+            //$$ ctx.getSource().sendSuccess(() -> InitWrap.text().formatText(finalReply), false);
+            //#else
+            ctx.getSource().sendSuccess(InitWrap.text().formatText(finalReply), false);
+            //#endif
+
+            return 1;
+        }
 
         if (target == null)
         {

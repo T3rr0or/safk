@@ -31,7 +31,6 @@ package io.qxl.safk.impl.commands;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 
-import com.google.common.base.Predicates;
 import org.jetbrains.annotations.ApiStatus;
 
 import net.minecraft.commands.CommandSourceStack;
@@ -54,18 +53,20 @@ public class PermsWrap
 //#endif
 	}
 
+	/**
+	 * Reads advancedAdminOptions when the command runs, not when the tree is
+	 * built, so toggling it takes effect on the next /safk-admin reload rather
+	 * than the next server restart.
+	 */
 	public static Predicate<CommandSourceStack> checkAdv(@Nonnull String node, int level)
 	{
-		if (!ConfigWrap.mainOpt().advancedAdminOptions)
-		{
-			return Predicates.alwaysFalse();
-		}
-
 //#if MC >= 1.16.5
-//$$		return Permissions.require(node, permissionFromInt(level));
+//$$		Predicate<CommandSourceStack> allowed = Permissions.require(node, permissionFromInt(level));
 //#else
-		return (src -> src.hasPermission(permissionFromInt(level)));
+		Predicate<CommandSourceStack> allowed = (src -> src.hasPermission(permissionFromInt(level)));
 //#endif
+
+		return (src -> ConfigWrap.mainOpt().advancedAdminOptions && allowed.test(src));
 	}
 
 	public static boolean check(@Nonnull Entity entity, @Nonnull String node, int level)
