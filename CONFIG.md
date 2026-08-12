@@ -4,7 +4,7 @@ Lives at `config/safk.json`. It is written on first server start, so run the ser
 
 ```json
 {
-    "___comment": "SaveAFK-Development Version-0.2.2 Config",
+    "___comment": "SaveAFK-Development Version-0.1.0 Config",
     "config_date": "Sun, 2 Aug 2026 20:09:55 -0400",
     "last_start": 1785715811712,
     "last_stop": 1785715815367,
