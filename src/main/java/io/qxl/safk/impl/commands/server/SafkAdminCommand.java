@@ -52,7 +52,11 @@ import com.sakuraryoko.corelib.impl.config.ConfigManager;
 import io.qxl.safk.impl.Reference;
 import io.qxl.safk.impl.SaveAfk;
 import io.qxl.safk.impl.commands.PermsWrap;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.SimpleMenuProvider;
+
 import io.qxl.safk.impl.config.ConfigWrap;
+import io.qxl.safk.impl.gui.SafkListMenu;
 import io.qxl.safk.impl.config.SafkConfigHandler;
 import io.qxl.safk.impl.config.data.options.PlayerOptions;
 import io.qxl.safk.impl.events.PlayerEventsHandler;
@@ -80,7 +84,11 @@ public class SafkAdminCommand implements IServerCommand
         dispatcher.register(
                 literal(this.getName())
                         .requires(PermsWrap.check(this.getNode(), ConfigWrap.cmdOpt().safkAdminCommandPermissions))
-                        .executes(this::about)
+                        .executes(this::root)
+                        .then(literal("about")
+                                      .requires(PermsWrap.check(this.getNode()+".about", ConfigWrap.cmdOpt().safkAdminCommandPermissions))
+                                      .executes(this::about)
+                        )
                         .then(literal("save")
                                       .requires(PermsWrap.check(this.getNode()+".save", ConfigWrap.cmdOpt().safkAdminCommandPermissions))
                                       .executes(this::save)
@@ -523,6 +531,25 @@ public class SafkAdminCommand implements IServerCommand
         {
             SaveAfk.debugLog("infoPlayer: by: [console/unknown] for player: ['{}'/{}]", ProfileWrap.name(profile), ProfileWrap.id(profile));
         }
+
+        return 1;
+    }
+
+    /**
+     * Bare /safk-admin opens the list screen. Console has no screen to open, so
+     * it keeps the mod information it always printed.
+     */
+    @ApiStatus.Internal
+    private int root(CommandContext<CommandSourceStack> ctx)
+    {
+        ServerPlayer player = ctx.getSource().getPlayer();
+
+        if (player == null)
+        {
+            return this.about(ctx);
+        }
+
+        SafkListMenu.open(player);
 
         return 1;
     }
