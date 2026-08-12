@@ -41,6 +41,30 @@ public class LegacyText
 {
 	public static final char CODE = '§';
 
+	/**
+	 * Drops the section-sign codes, leaving the words. Placeholders hand data to
+	 * other mods, which do their own styling.
+	 */
+	public static String strip(@Nonnull String text)
+	{
+		StringBuilder out = new StringBuilder(text.length());
+
+		for (int i = 0; i < text.length(); i++)
+		{
+			char c = text.charAt(i);
+
+			if (c == CODE && i + 1 < text.length() && ChatFormatting.getByCode(text.charAt(i + 1)) != null)
+			{
+				i++;
+				continue;
+			}
+
+			out.append(c);
+		}
+
+		return out.toString();
+	}
+
 	public static MutableComponent parse(@Nonnull String text)
 	{
 		MutableComponent result = Component.empty();

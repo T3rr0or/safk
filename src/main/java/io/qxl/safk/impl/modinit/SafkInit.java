@@ -25,6 +25,7 @@ import org.jetbrains.annotations.ApiStatus;
 import io.qxl.safk.impl.SaveAfk;
 import io.qxl.safk.impl.Reference;
 import io.qxl.safk.impl.commands.CommandRegister;
+import io.qxl.safk.impl.compat.placeholder.SafkPlaceholders;
 import io.qxl.safk.impl.config.SafkConfigHandler;
 import io.qxl.safk.impl.config.ConfigWrap;
 import io.qxl.safk.impl.events.PlayerEventsHandler;
@@ -105,6 +106,7 @@ public class SafkInit implements IModInitDispatcher
 
         ServerEventsManager.getInstance().registerEventDispatcher(ServerEventsHandler.getInstance());
         PlayerEventsManager.getInstance().registerPlayerEvents(PlayerEventsHandler.getInstance());
+        SafkPlaceholders.register();
 
         SaveAfk.debugLog("All Tasks Done.");
         this.INIT = true;

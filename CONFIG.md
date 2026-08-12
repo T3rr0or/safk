@@ -32,6 +32,8 @@ Lives at `config/safk.json`. It is written on first server start, so run the ser
     },
     "messages": {
         "broadcastMessages": false,
+        "afkLastInTabList": true,
+        "tabListPrefix": "§7[AFK] ",
         "hideSafkJoin": false,
         "displayDuration": false,
         "displayReturnFeedback": false,

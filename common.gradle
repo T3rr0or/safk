@@ -95,7 +95,12 @@ dependencies {
 	autoImplementation include("com.sakuraryoko:corelib:${project.corelib_version}-mc${project.minecraft_version}")
 //	autoImplementation include("com.sakuraryoko:more-color-api:${project.more_color_api_version}-mc${project.minecraft_version}")
 	autoImplementation include("me.lucko:fabric-permissions-api:${project.fabric_permissions_api_version}")
-//	autoImplementation "eu.pb4:placeholder-api:${project.placeholder_api_version}"
+	// Optional at runtime: compiled against, never bundled, and the integration
+	// is skipped when the mod is absent. 1.19.2 only ever had a pre-release, so
+	// that version ships without placeholder support.
+	if (project.hasProperty('placeholder_api_version')) {
+		autoCompileOnly "eu.pb4:placeholder-api:${project.placeholder_api_version}"
+	}
 //	autoCompileOnly "maven.modrinth:vanish:${project.vanish_compat_version}"
 }
 

@@ -63,10 +63,57 @@ Settings live in `config/safk.json`.
 | **Command**  | `enableSafkCommand`           | Enables the `/safk` command.                                                                              | `true`   |
 | **Command**  | `enableAfkCommand`            | Enables the `/afk` command. (works the same as `/safk`)                                                   | `false`  |
 | **Messages** | `broadcastMessages`           | Broadcasts AFK status messages.                                                                           | `false`  |
-| **Messages** | `tabListSuffix`               | Marker appended to an AFK bot's name in the player list. Empty turns it off.                | `" §7[AFK]"` |
+| **Messages** | `tabListPrefix`               | Marker put before an AFK bot's name in the player list. Empty turns it off.                 | `"§7[AFK] "` |
+| **Messages** | `afkLastInTabList`            | Sorts AFK players to the bottom of the player list. Needs 1.21.2 or newer.                  | `true`   |
 | **Messages** | `hideSafkJoin`                | Suppresses the default `player has joined` messages while bots are spawned, where possible.               | `false`  |
 | **Messages** | `displayDuration`             | Shows the duration in AFK status messages.                                                                | `false`  |
 | **Messages** | `displayReturnFeedback`       | Shows why an AFK session ended.                                                                           | `false`  |
+
+## Integrations
+
+SaveAFK publishes its state through [Placeholder API](https://modrinth.com/mod/placeholder-api) rather than styling names itself. A player only gets one scoreboard team, so a mod that claims it for an AFK marker ends up fighting whatever rank system the server runs. Handing the state out instead lets the mod that already owns nametags and the tab list compose `[AFK] ++ Name` from your real ranks.
+
+| Placeholder | Value |
+|:------------|:------|
+| `%safk:marker%` | The AFK marker plus a trailing space, or empty when the player is not AFK |
+| `%safk:is_afk%` | `true` or `false` |
+| `%safk:duration%` | How long they have been AFK |
+| `%safk:remaining%` | Time left before the session expires |
+| `%safk:reason%` | The reason they gave |
+
+`%safk:marker%` carries its own trailing space, because a format string cannot put a separator behind a value that is sometimes empty. Interpolate it unconditionally and non-AFK players stay clean.
+
+Placeholder API is optional. Without it the integration is skipped and everything else still works.
+
+### Tested with
+
+[**TAB**](https://modrinth.com/plugin/tab-was-taken) handles the tab list and nametags together, and reads Placeholder API on Fabric. In `groups.yml`:
+
+```yaml
+_DEFAULT_:
+  tabprefix: "%safk:marker%%luckperms-prefix%"
+  tagprefix: "%safk:marker%%luckperms-prefix%"
+```
+
+To sink AFK players to the bottom of the tab list, put this first in `sorting-types` in `config.yml`, since `false` sorts before `true`:
+
+```yaml
+  sorting-types:
+    - "PLACEHOLDER_A_TO_Z:%safk:is_afk%"
+```
+
+[**CustomNameTags**](https://modrinth.com/mod/customnametags) does nametags alone. Its nametag *replaces* the name rather than adding a line, so keep the player in the literal:
+
+```json
+{ "nametags": [ { "id": "safk:afk", "update_interval": 20,
+                  "literal": "<gray>%safk:marker%</gray>%player:displayname_visual%" } ] }
+```
+
+Pin `1.5.0`; `1.5.1` fails to boot on a missing bundled Arcade module. It also needs `fabric-language-kotlin`.
+
+[**Styled Player List**](https://modrinth.com/mod/styledplayerlist) covers the tab list on its own if you would rather not run TAB.
+
+Set `tabListPrefix` to empty when one of these owns the tab list, or the marker appears twice.
 
 ### Per-player timeouts
 
