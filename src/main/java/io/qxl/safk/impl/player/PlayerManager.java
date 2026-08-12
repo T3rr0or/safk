@@ -44,6 +44,7 @@ import io.qxl.safk.api.state.PosState;
 import io.qxl.safk.api.state.SafkState;
 import io.qxl.safk.api.state.SafkStatus;
 import io.qxl.safk.impl.Reference;
+import io.qxl.safk.impl.compat.carpet.CarpetCompat;
 import io.qxl.safk.impl.SaveAfk;
 import io.qxl.safk.impl.config.ConfigWrap;
 import io.qxl.safk.impl.config.SafkConfigHandler;
@@ -353,6 +354,9 @@ public class PlayerManager
 	@ApiStatus.Internal
 	public void updatePlayerData(@Nonnull ServerPlayer player)
 	{
+		// Carpet's /player bots are not people and must never reach the config.
+		if (CarpetCompat.isFakePlayer(player)) { return; }
+
 		PosState pos = PosWrap.of(player);
 		GameState game = GameWrap.of(player);
 		UUID uuid = player.getUUID();
@@ -589,6 +593,8 @@ public class PlayerManager
 	@ApiStatus.Internal
 	private boolean syncConfigEach(ServerPlayer player)
 	{
+		if (CarpetCompat.isFakePlayer(player)) { return false; }
+
 		ImmutableList<PlayerOptions> oldConfig = ImmutableList.copyOf(ConfigWrap.players());
 		List<PlayerOptions> newConfig = new ArrayList<>();
 		String name = player.getName().getString();
@@ -958,6 +964,8 @@ public class PlayerManager
 
 	private boolean onTickEach(ServerPlayer player)
 	{
+		if (CarpetCompat.isFakePlayer(player)) { return false; }
+
 		UUID uuid = player.getUUID();
 
 		if (!this.players.containsKey(uuid))

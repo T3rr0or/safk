@@ -36,6 +36,7 @@ import net.minecraft.server.level.ServerPlayer;
 import io.qxl.safk.impl.SaveAfk;
 import io.qxl.safk.impl.config.ConfigWrap;
 import io.qxl.safk.impl.modinit.InitWrap;
+import io.qxl.safk.impl.compat.carpet.CarpetCompat;
 import io.qxl.safk.impl.player.PlayerManager;
 import io.qxl.safk.impl.player.wrap.ProfileWrap;
 import io.qxl.safk.api.state.SafkState;
@@ -66,6 +67,7 @@ public class PlayerEventsHandler implements IPlayerEventsDispatch
 	{
 //		SaveAfk.debugLog("onCreatePlayer(): ['{}'/{}]", player.getName().getString(), player.getUUID().toString());
 		if (player instanceof SafkServerPlayer) { return; }
+		if (CarpetCompat.isFakePlayer(player)) { return; }
 		PlayerManager.getInstance().syncProfile(profile);
 	}
 
@@ -125,7 +127,11 @@ public class PlayerEventsHandler implements IPlayerEventsDispatch
 
 		PlayerManager.getInstance().updatePlayerData(newPlayer);
 		if (newPlayer instanceof SafkServerPlayer) { return; }
-		PlayerManager.getInstance().syncProfile(newPlayer.getGameProfile());
+
+		if (!CarpetCompat.isFakePlayer(newPlayer))
+		{
+			PlayerManager.getInstance().syncProfile(newPlayer.getGameProfile());
+		}
 
 		if (server != null)
 		{
@@ -138,7 +144,11 @@ public class PlayerEventsHandler implements IPlayerEventsDispatch
 	{
 //		SaveAfk.debugLog("onPlayerLeave(): ['{}'/{}]", player.getName().getString(), player.getUUID().toString());
 		PlayerManager.getInstance().updatePlayerData(player);
-		PlayerManager.getInstance().syncProfile(player.getGameProfile());
+
+		if (!CarpetCompat.isFakePlayer(player))
+		{
+			PlayerManager.getInstance().syncProfile(player.getGameProfile());
+		}
 	}
 
 	public void onTick(ServerPlayer player)
