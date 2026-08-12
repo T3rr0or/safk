@@ -859,6 +859,24 @@ public class SafkServerPlayer extends ServerPlayer
 		}
 	}
 
+	//#if MC >= 1.21.2
+	//$$ /**
+	//$$  * Sinks AFK bots below everyone actually playing. The client sorts on this
+	//$$  * before the team name, so it needs no scoreboard team and cannot disturb
+	//$$  * team-driven PvP rules. Older versions have no such field and keep the
+	//$$  * default ordering.
+	//$$  *
+	//$$  * The client negates this value before sorting ascending, so the lowest
+	//$$  * order lands at the bottom. MIN_VALUE itself is not usable: negating it
+	//$$  * overflows back to itself and would send the bots to the top instead.
+	//$$  */
+	//$$ @Override
+	//$$ public int getTabListOrder()
+	//$$ {
+		//$$ return ConfigWrap.mess().afkLastInTabList ? Integer.MIN_VALUE + 1 : super.getTabListOrder();
+	//$$ }
+	//#endif
+
 	/**
 	 * Marks the bot in the player list so nobody wastes a message on someone who
 	 * is not at the keyboard. Sent with the player-info packet when the bot is
@@ -867,14 +885,14 @@ public class SafkServerPlayer extends ServerPlayer
 	@Override
 	public Component getTabListDisplayName()
 	{
-		String suffix = ConfigWrap.mess().tabListSuffix;
+		String prefix = ConfigWrap.mess().tabListPrefix;
 
-		if (suffix == null || suffix.isEmpty())
+		if (prefix == null || prefix.isEmpty())
 		{
 			return super.getTabListDisplayName();
 		}
 
-		return LegacyText.parse(ProfileWrap.name(this.getGameProfile()) + suffix);
+		return LegacyText.parse(prefix + ProfileWrap.name(this.getGameProfile()));
 	}
 
 	@Override
