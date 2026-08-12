@@ -127,11 +127,11 @@ public class SafkCommand implements IServerCommand
             }
 
             // The player asked for nothing in particular, so trim rather than refuse.
-            time = SafkLimits.clampToMax(time);
+            time = SafkLimits.clampToMax(time, player);
         }
         else
         {
-            String tooLong = SafkLimits.rejectTimeout(time);
+            String tooLong = SafkLimits.rejectTimeout(time, player);
 
             if (tooLong != null)
             {

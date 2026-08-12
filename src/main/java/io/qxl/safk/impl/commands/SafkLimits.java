@@ -20,9 +20,12 @@
 
 package io.qxl.safk.impl.commands;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.jetbrains.annotations.ApiStatus;
+
+import net.minecraft.server.level.ServerPlayer;
 
 import io.qxl.safk.impl.config.ConfigWrap;
 import io.qxl.safk.impl.player.safk.SafkEntryList;
@@ -44,12 +47,12 @@ public class SafkLimits
 
 	/**
 	 * Trims a timeout the player never asked for. Reached only when the
-	 * configured default runs past the cap, so refusing would leave a bare
-	 * /safk permanently broken.
+	 * configured default runs past their ceiling, so refusing would leave a
+	 * bare /safk permanently broken.
 	 */
-	public static int clampToMax(int minutes)
+	public static int clampToMax(int minutes, @Nonnull ServerPlayer player)
 	{
-		int max = ConfigWrap.safk().maxSafkTimeout;
+		int max = TimeoutTier.resolve(player);
 
 		if (unlimited(max) || minutes <= max)
 		{
@@ -62,9 +65,9 @@ public class SafkLimits
 	/**
 	 * @return null when the request is allowed, otherwise the refusal to show.
 	 */
-	public static @Nullable String rejectTimeout(int minutes)
+	public static @Nullable String rejectTimeout(int minutes, @Nonnull ServerPlayer player)
 	{
-		int max = ConfigWrap.safk().maxSafkTimeout;
+		int max = TimeoutTier.resolve(player);
 
 		if (unlimited(max) || minutes <= max)
 		{

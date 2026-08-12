@@ -63,9 +63,24 @@ Settings live in `config/safk.json`.
 | **Command**  | `enableSafkCommand`           | Enables the `/safk` command.                                                                              | `true`   |
 | **Command**  | `enableAfkCommand`            | Enables the `/afk` command. (works the same as `/safk`)                                                   | `false`  |
 | **Messages** | `broadcastMessages`           | Broadcasts AFK status messages.                                                                           | `false`  |
+| **Messages** | `tabListSuffix`               | Marker appended to an AFK bot's name in the player list. Empty turns it off.                | `" §7[AFK]"` |
 | **Messages** | `hideSafkJoin`                | Suppresses the default `player has joined` messages while bots are spawned, where possible.               | `false`  |
 | **Messages** | `displayDuration`             | Shows the duration in AFK status messages.                                                                | `false`  |
 | **Messages** | `displayReturnFeedback`       | Shows why an AFK session ended.                                                                           | `false`  |
+
+### Per-player timeouts
+
+Grant a permission node to give a player their own ceiling. A granted tier replaces `maxSafkTimeout` for that player, so it can lift a donor above the server cap or hold a newcomer below it. The highest granted tier wins, and a player with no node falls back to `maxSafkTimeout`.
+
+| Node | Allowance |
+|:-----|:----------|
+| `safk.timeout.hour` | 60 minutes |
+| `safk.timeout.day` | 1440 minutes |
+| `safk.timeout.week` | 10080 minutes |
+| `safk.timeout.month` | 43200 minutes |
+| `safk.timeout.max` | whatever `maxSafkTimeout` is set to |
+
+The tiers are named rather than numeric because a permission node can only be tested by name, never listed. Nodes are checked without an operator-level fallback, so a tier has to be granted deliberately instead of arriving with op.
 
 ### Limits
 

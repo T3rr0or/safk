@@ -104,6 +104,7 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 //$$ import io.qxl.safk.impl.Reference;
 //#endif
 import io.qxl.safk.impl.SaveAfk;
+import io.qxl.safk.impl.text.LegacyText;
 import io.qxl.safk.impl.config.ConfigWrap;
 import io.qxl.safk.impl.config.data.options.PlayerOptions;
 import io.qxl.safk.impl.player.wrap.*;
@@ -856,6 +857,24 @@ public class SafkServerPlayer extends ServerPlayer
 				//#endif
 			}
 		}
+	}
+
+	/**
+	 * Marks the bot in the player list so nobody wastes a message on someone who
+	 * is not at the keyboard. Sent with the player-info packet when the bot is
+	 * added, so a config change shows up on the next session rather than live.
+	 */
+	@Override
+	public Component getTabListDisplayName()
+	{
+		String suffix = ConfigWrap.mess().tabListSuffix;
+
+		if (suffix == null || suffix.isEmpty())
+		{
+			return super.getTabListDisplayName();
+		}
+
+		return LegacyText.parse(ProfileWrap.name(this.getGameProfile()) + suffix);
 	}
 
 	@Override

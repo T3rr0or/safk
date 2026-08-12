@@ -69,6 +69,19 @@ public class PermsWrap
 		return (src -> ConfigWrap.mainOpt().advancedAdminOptions && allowed.test(src));
 	}
 
+	/**
+	 * Node check with no operator-level fallback, so a tier has to be granted
+	 * on purpose rather than coming free with op.
+	 */
+	public static boolean checkNode(@Nonnull Entity entity, @Nonnull String node)
+	{
+//#if MC >= 1.16.5
+//$$		return Permissions.check(entity, node);
+//#else
+		return false;
+//#endif
+	}
+
 	public static boolean check(@Nonnull Entity entity, @Nonnull String node, int level)
 	{
 //#if MC >= 1.16.5

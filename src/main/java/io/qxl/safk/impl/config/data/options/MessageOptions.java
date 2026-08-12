@@ -36,6 +36,7 @@ public class MessageOptions implements IConfigOption
 	public boolean displayDuration;
 	public boolean displayReturnFeedback;
 	public String defaultSafkReason;
+	public String tabListSuffix;
 	public String safkPlayerPrefix;
 	public String safkPlayerSuffix;
 	public String safkKickMessage;
@@ -75,6 +76,8 @@ public class MessageOptions implements IConfigOption
 		this.displayDuration = false;
 		this.displayReturnFeedback = false;
 		this.defaultSafkReason = "";
+		// Marks AFK bots in the player list; empty turns the marker off.
+		this.tabListSuffix = " §7[AFK]";
 		this.safkPlayerPrefix = "§e";
 		this.safkPlayerSuffix = "§r";
 		this.safkKickMessage = "§6Your player will be AFK§r";
@@ -114,6 +117,7 @@ public class MessageOptions implements IConfigOption
 		this.displayDuration = opts.displayDuration;
 		this.displayReturnFeedback = opts.displayReturnFeedback;
 		this.defaultSafkReason = opts.defaultSafkReason;
+		this.tabListSuffix = opts.tabListSuffix != null ? opts.tabListSuffix : " §7[AFK]";
 		this.safkPlayerPrefix = opts.safkPlayerPrefix;
 		this.safkPlayerSuffix = opts.safkPlayerSuffix;
 		this.safkKickMessage = opts.safkKickMessage;
