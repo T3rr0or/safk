@@ -48,6 +48,8 @@ Settings live in `config/safk.json`.
 | **Main**     | `reducedListDebugInfo`        | Reduced output for the information commands.                                                              | `true`   |
 | **Main**     | `advancedAdminOptions`        | Enables advanced admin options, such as `set`.                                                            | `false`  |
 | **Safk**     | `defaultSafkTimeout`          | Default timeout in minutes. Ships at 90 days.                                                             | `129600` |
+| **Safk**     | `maxSafkTimeout`              | Longest timeout a player may request, in minutes. `-1` removes the limit.                                 | `129600` |
+| **Safk**     | `maxConcurrentBots`           | How many AFK bots may exist at once, server-wide. `-1` removes the limit.                                 | `-1`     |
 | **Safk**     | `resetHealthUponDeath`        | Resets the bot's health when it is killed.                                                                | `false`  |
 | **Safk**     | `safkDisableDamage`           | Prevents the bot from taking damage.                                                                      | `false`  |
 | **Safk**     | `safkHidePlayer`              | Makes the bot invisible to others.                                                                        | `false`  |
@@ -61,6 +63,16 @@ Settings live in `config/safk.json`.
 | **Messages** | `hideSafkJoin`                | Suppresses the default `player has joined` messages while bots are spawned, where possible.               | `false`  |
 | **Messages** | `displayDuration`             | Shows the duration in AFK status messages.                                                                | `false`  |
 | **Messages** | `displayReturnFeedback`       | Shows why an AFK session ended.                                                                           | `false`  |
+
+### Limits
+
+Two options bound what players can ask for. Set either to `-1` to remove that limit entirely.
+
+`maxSafkTimeout` ships equal to `defaultSafkTimeout`, so out of the box it caps nothing — lower it to tighten. A player who names a longer time gets refused and told the maximum. When the *default* runs past the cap, SaveAFK trims the session instead of refusing, so a misconfigured default can never leave a bare `/safk` broken.
+
+`maxConcurrentBots` ships off, because the right number depends on your slot count. Set it to a positive number and `/safk` is refused once that many bots are up.
+
+Neither limit applies to `/safk-admin spawn` — operators can always place a bot.
 
 **Messages & Formatting:**
 Every broadcast message is configurable. The kick message a player sees on a successful `/safk` defaults to `"§6Your player will be AFK§r"`.

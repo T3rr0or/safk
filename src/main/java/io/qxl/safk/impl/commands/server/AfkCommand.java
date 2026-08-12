@@ -37,6 +37,7 @@ import com.sakuraryoko.corelib.api.commands.IServerCommand;
 import io.qxl.safk.impl.Reference;
 import io.qxl.safk.impl.SaveAfk;
 import io.qxl.safk.impl.commands.PermsWrap;
+import io.qxl.safk.impl.commands.SafkLimits;
 import io.qxl.safk.impl.config.ConfigWrap;
 import io.qxl.safk.impl.modinit.InitWrap;
 import io.qxl.safk.impl.player.wrap.ProfileWrap;
@@ -129,7 +130,37 @@ public class AfkCommand implements IServerCommand
             {
                 time = 129600;
             }
+
+            // The player asked for nothing in particular, so trim rather than refuse.
+            time = SafkLimits.clampToMax(time);
         }
+        else
+        {
+            String tooLong = SafkLimits.rejectTimeout(time);
+
+            if (tooLong != null)
+            {
+                //#if MC >= 1.20.1
+                //$$ context.getSource().sendSuccess(() -> InitWrap.text().formatTextSafe(tooLong), false);
+                //#else
+                context.getSource().sendSuccess(InitWrap.text().formatTextSafe(tooLong), false);
+                //#endif
+                return 1;
+            }
+        }
+
+        String noRoom = SafkLimits.rejectConcurrent();
+
+        if (noRoom != null)
+        {
+            //#if MC >= 1.20.1
+            //$$ context.getSource().sendSuccess(() -> InitWrap.text().formatTextSafe(noRoom), false);
+            //#else
+            context.getSource().sendSuccess(InitWrap.text().formatTextSafe(noRoom), false);
+            //#endif
+            return 1;
+        }
+
         if (reason == null || reason.isEmpty())
         {
             reason = ConfigWrap.mess().defaultSafkReason;

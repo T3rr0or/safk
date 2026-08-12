@@ -23,6 +23,8 @@ Lives at `config/safk.json`. It is written on first server start, so run the ser
     },
     "safk": {
         "defaultSafkTimeout": 129600,
+        "maxSafkTimeout": 129600,
+        "maxConcurrentBots": -1,
         "resetHealthUponDeath": false,
         "safkDisableDamage": false,
         "safkHidePlayer": false,

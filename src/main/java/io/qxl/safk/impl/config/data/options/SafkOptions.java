@@ -27,6 +27,8 @@ import org.jetbrains.annotations.ApiStatus;
 public class SafkOptions implements IConfigOption
 {
 	public int defaultSafkTimeout;
+	public int maxSafkTimeout;
+	public int maxConcurrentBots;
 	public boolean resetHealthUponDeath;
 	public boolean safkDisableDamage;
 	public boolean safkHidePlayer;
@@ -41,6 +43,10 @@ public class SafkOptions implements IConfigOption
 	public void defaults()
 	{
 		this.defaultSafkTimeout = 129600;
+		// Matches the default timeout, so it caps nothing until an owner lowers it.
+		this.maxSafkTimeout = 129600;
+		// Off by default: the right number depends on the server's slot count.
+		this.maxConcurrentBots = -1;
 		this.resetHealthUponDeath = false;
 		this.safkDisableDamage = false;
 		this.safkHidePlayer = false;
@@ -53,6 +59,8 @@ public class SafkOptions implements IConfigOption
 		SafkOptions opts = (SafkOptions) opt;
 
 		this.defaultSafkTimeout = opts.defaultSafkTimeout;
+		this.maxSafkTimeout = opts.maxSafkTimeout;
+		this.maxConcurrentBots = opts.maxConcurrentBots;
 		this.resetHealthUponDeath = opts.resetHealthUponDeath;
 		this.safkDisableDamage = opts.safkDisableDamage;
 		this.safkHidePlayer = opts.safkHidePlayer;
