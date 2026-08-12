@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "Disconnect and leave a bot standing in your place, so your farms keep running while your PC is off.",
+  "authors": [
+    "${mod_author}"
+  ],
+  "contributors": [
+    "Sakura-Ryoko (original Unplugged-AFK)"
+  ],
+  "contact": {
+    "homepage": "https://github.com/${mod_author}/${mod_id}",
+    "sources": "https://github.com/${mod_author}/${mod_id}",
+    "issues": "https://github.com/${mod_author}/${mod_id}/issues"
+  },
+  "license": "LGPL-3.0",
+
+  "icon": "assets/safk/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.qxl.safk.impl.SaveAfk"
+    ]
+  },
+  "mixins": [
+    "safk.mixins.json"
+  ],
+  "accessWidener": "safk.accesswidener",
+
+  "depends": {
+    "fabricloader": ">=0.11.4",
+    "corelib": "*",
+    "fabric-permissions-api-v0": "*",
+    "minecraft": "${minecraft_dependency}"
+  }
+}

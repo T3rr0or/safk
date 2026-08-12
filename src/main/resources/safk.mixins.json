@@ -1,0 +1,30 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "io.qxl.safk.impl.mixins",
+    "plugin": "io.qxl.safk.impl.compat.mixin.SafkMixinConfigPlugin",
+    "compatibilityLevel": "{{COMPATIBILITY_LEVEL}}",
+    "mixins": [
+        "MixinConnection",
+        "MixinEntity",
+        "MixinMinecraftServer",
+        "MixinPistonMovingBlockEntity",
+        "MixinPlayer",
+        "MixinPlayerList_core",
+        "MixinPlayerList_messageSuppress",
+        "MixinServerLoginPacketListenerImpl",
+        "MixinServerPlayer_core",
+        "MixinServerPlayer_fakeMovement",
+        "MixinServerPlayer_messageSuppress",
+        "MixinServerWaypointManager",
+        "MixinTickRateManager"
+    ],
+    "client": [
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "overwrites": {
+        "requireAnnotations": true
+  }
+}
